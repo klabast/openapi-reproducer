@@ -19,6 +19,7 @@
 
 1. In the frontend "project" run
     ```shell
+    rm -rf ./src/api
     npm run openapi:codegen
     ```
     (don't forget `npm i`)

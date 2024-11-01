@@ -16,7 +16,7 @@
 import * as runtime from '../runtime';
 
 export interface ApiSomethingUploadPostRequest {
-    uploadFile?: object;
+    uploadFile: Blob;
 }
 
 /**
@@ -25,8 +25,16 @@ export interface ApiSomethingUploadPostRequest {
 export class SomeApiApi extends runtime.BaseAPI {
 
     /**
+     * Upload
      */
     async apiSomethingUploadPostRaw(requestParameters: ApiSomethingUploadPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+        if (requestParameters['uploadFile'] == null) {
+            throw new runtime.RequiredError(
+                'uploadFile',
+                'Required parameter "uploadFile" was null or undefined when calling apiSomethingUploadPost().'
+            );
+        }
+
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -39,6 +47,8 @@ export class SomeApiApi extends runtime.BaseAPI {
 
         let formParams: { append(param: string, value: any): any };
         let useForm = false;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
         if (useForm) {
             formParams = new FormData();
         } else {
@@ -46,8 +56,8 @@ export class SomeApiApi extends runtime.BaseAPI {
         }
 
         if (requestParameters['uploadFile'] != null) {
-            formParams.append('uploadFile', new Blob([JSON.stringify(objectToJSON(requestParameters['uploadFile']))], { type: "application/json", }));
-                    }
+            formParams.append('uploadFile', requestParameters['uploadFile'] as any);
+        }
 
         const response = await this.request({
             path: `/api/something/upload`,
@@ -65,8 +75,9 @@ export class SomeApiApi extends runtime.BaseAPI {
     }
 
     /**
+     * Upload
      */
-    async apiSomethingUploadPost(requestParameters: ApiSomethingUploadPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+    async apiSomethingUploadPost(requestParameters: ApiSomethingUploadPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
         const response = await this.apiSomethingUploadPostRaw(requestParameters, initOverrides);
         return await response.value();
     }
